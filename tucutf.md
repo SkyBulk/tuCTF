@@ -5,7 +5,7 @@
 > Mrs. White's simple website might be hiding some murderous intentions...
 
 
-![maids](https://github.com/SkyBulk/tuCTF/blob/master/images/maids.png)
+![maids](https://github.com/SkyBulk/tuCTF/blob/master/images/maid.png)
 
 	
 the first at all , we analize the source code , and we found /Boddy. and then we added to the url
